@@ -335,27 +335,47 @@ uint8_t furi_hal_subghz_get_lqi(void) {
     return data[0] & 0x7F;
 }
 
-bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
-    if(!(value >= 299999755 && value <= 348000335) &&
-       !(value >= 386999938 && value <= 464000000) &&
-       !(value >= 778999847 && value <= 928000000)) {
-        return false;
-    }
+/* 
+ Modified to the full YARD Stick One extended range of 281-361 MHz, 378-481 MHz, and 749-962 MHz. 
+ These changes are at your own risk. The PLL may not lock and FZ devs have warned of possible damage
+ Set flag use_ext_range_at_own_risk in setting_user to use
+ */
 
-    return true;
-}
+ bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
+     FURI_LOG_I(TAG, "Checking if frequency is valid");
+     bool is_extended = true;
 
-uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
-    value = furi_hal_subghz_set_frequency(value);
-    if(value >= 299999755 && value <= 348000335) {
-        furi_hal_subghz_set_path(FuriHalSubGhzPath315);
-    } else if(value >= 386999938 && value <= 464000000) {
-        furi_hal_subghz_set_path(FuriHalSubGhzPath433);
-    } else if(value >= 778999847 && value <= 928000000) {
-        furi_hal_subghz_set_path(FuriHalSubGhzPath868);
-    } else {
-        furi_crash("SubGhz: Incorrect frequency during set.");
-    }
+
+ // No flag - test original range, flag set, test extended range
+     if(!(value >= 299999755 && value <= 348000335) &&
+        !(value >= 386999938 && value <= 464000000) &&
+        !(value >= 778999847 && value <= 928000000) &&
+        !(is_extended)) {
+        FURI_LOG_I(TAG, "Frequency blocked - outside standard range");
+         return false;
+     } else if(!(value >= 281000000 && value <= 361000000) &&
+        !(value >= 378000000 && value <= 481000000) &&
+        !(value >= 749000000 && value <= 962000000) &&
+        is_extended) {
+        FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
+         return false;
+     }
+
+     return true;
+ }
+
+ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
+     // Set these values to the extended frequency range only. They dont define if you can transmit but do select the correct RF path
+     value = furi_hal_subghz_set_frequency(value);
+     if(value >= 281000000 && value <= 361000000) {
+         furi_hal_subghz_set_path(FuriHalSubGhzPath315);
+     } else if(value >= 378000000 && value <= 481000000) {
+         furi_hal_subghz_set_path(FuriHalSubGhzPath433);
+     } else if(value >= 749000000 && value <= 962000000) {
+         furi_hal_subghz_set_path(FuriHalSubGhzPath868);
+     } else {
+         furi_crash("SubGhz: Incorrect frequency during set.");
+     }
     return value;
 }
 
