@@ -1,7 +1,7 @@
 App(
     appid="nfc",
     name="NFC",
-    apptype=FlipperAppType.MENUEXTERNAL,
+    apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="nfc_app",
     icon="A_NFC_14",

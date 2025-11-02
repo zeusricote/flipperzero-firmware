@@ -1,7 +1,7 @@
 App(
     appid="ibutton",
     name="iButton",
-    apptype=FlipperAppType.MENUEXTERNAL,
+    apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="ibutton_app",
     icon="A_iButton_14",
